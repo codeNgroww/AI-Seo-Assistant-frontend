@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Sparkles,
   ShieldCheck,
@@ -14,12 +14,13 @@ import {
   Plus,
   Eye,
   Search,
-  ExternalLink,
   History,
   FileCheck,
   Building2,
   ShieldAlert,
-  Info
+  Info,
+  SlidersHorizontal,
+  ArrowRight
 } from 'lucide-react';
 
 interface FaqItem {
@@ -59,7 +60,7 @@ interface SeoDraft {
 const API_BASE = 'http://localhost:3001/api/seo';
 
 export default function AiSeoDashboard() {
-  // Section A: Page Information (defaults specified in assessment)
+  // Section A: Page Information (Assessment defaults)
   const [pageTitle, setPageTitle] = useState('Space42 Arena – Summer Music Festival');
   const [pageDescription, setPageDescription] = useState(
     'A fictional music festival featuring live performances, food stalls and entertainment in Abu Dhabi.'
@@ -235,7 +236,7 @@ export default function AiSeoDashboard() {
 
     if (currentDraft.status === 'DRAFT') {
       showToast(
-        'Action Blocked: Content is currently in DRAFT status. Human approval (APPROVED status) is strictly required before publishing.',
+        'Action Blocked: Content is in DRAFT status. Safe AI policy requires explicit human approval (APPROVED status) before publishing.',
         'error'
       );
       return;
@@ -323,7 +324,7 @@ export default function AiSeoDashboard() {
 
   const handleAddFaq = () => {
     if (editableFaqs.length >= 5) {
-      showToast('Maximum 5 FAQs recommended for optimal SEO snippet size.', 'warning');
+      showToast('Maximum 5 FAQs recommended for optimal search snippets.', 'warning');
       return;
     }
     const newFaq: FaqItem = {
@@ -344,47 +345,55 @@ export default function AiSeoDashboard() {
   const isMetaOptimal = metaLen >= 120 && metaLen <= 160;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-20">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 relative overflow-x-hidden">
+      {/* Subtle ambient light gradient background meshes */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-40 right-10 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none -z-10" />
+
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl border shadow-2xl backdrop-blur-xl animate-bounce-short transition-all ${
+          className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-xl backdrop-blur-md animate-fadeIn transition-all ${
             toast.type === 'success'
-              ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
+              ? 'bg-emerald-50/95 border-emerald-300 text-emerald-900 shadow-emerald-500/10'
               : toast.type === 'error'
-              ? 'bg-rose-950/90 border-rose-500/50 text-rose-200'
+              ? 'bg-rose-50/95 border-rose-300 text-rose-900 shadow-rose-500/10'
               : toast.type === 'warning'
-              ? 'bg-amber-950/90 border-amber-500/50 text-amber-200'
-              : 'bg-cyan-950/90 border-cyan-500/50 text-cyan-200'
+              ? 'bg-amber-50/95 border-amber-300 text-amber-900 shadow-amber-500/10'
+              : 'bg-indigo-50/95 border-indigo-300 text-indigo-900 shadow-indigo-500/10'
           }`}
         >
-          {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />}
-          {toast.type === 'error' && <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />}
-          {toast.type === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />}
-          {toast.type === 'info' && <Info className="w-5 h-5 text-cyan-400 shrink-0" />}
-          <span className="text-sm font-medium">{toast.message}</span>
+          {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />}
+          {toast.type === 'error' && <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0" />}
+          {toast.type === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />}
+          {toast.type === 'info' && <Info className="w-5 h-5 text-indigo-600 shrink-0" />}
+          <span className="text-sm font-semibold">{toast.message}</span>
         </div>
       )}
 
       {/* Top Header */}
-      <header className="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-              <Sparkles className="w-5 h-5 text-white" />
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white">
+              <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold tracking-tight text-white">AI SEO Assistant</h1>
-                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900">AI SEO Assistant</h1>
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                   Space42 Arena
                 </span>
-                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                  Admin Only
+                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                  Admin Console
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Safe AI Active
                 </span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
-                Safe AI Architecture • PII Redaction • HITL Approval Gate
+              <p className="text-xs text-slate-500 font-medium hidden sm:block mt-0.5">
+                Enterprise Search Optimization • PII Redaction Guard • Human-in-the-Loop Signoff
               </p>
             </div>
           </div>
@@ -397,19 +406,20 @@ export default function AiSeoDashboard() {
                 setPageDescription('A fictional music festival featuring live performances, food stalls and entertainment in Abu Dhabi.');
                 showToast('Reset to Space42 Arena default event inputs.', 'info');
               }}
-              className="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-colors flex items-center gap-1.5"
+              className="text-xs px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 font-semibold text-slate-700 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <Building2 className="w-3.5 h-3.5 text-cyan-400" />
+              <Building2 className="w-3.5 h-3.5 text-indigo-600" />
               <span>Space42 Default</span>
             </button>
             <button
               onClick={() => {
                 setPageTitle('DrVet Clinic – 24/7 Veterinary Emergency Care');
                 setPageDescription('Licensed veterinary hospital providing around-the-clock emergency care, surgery, and wellness checkups for pets in Abu Dhabi.');
-                showToast('Loaded DrVet medical scenario preset.', 'info');
+                showToast('Loaded DrVet scenario preset.', 'info');
               }}
-              className="text-xs px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-colors hidden md:flex items-center gap-1.5"
+              className="text-xs px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 font-semibold text-slate-700 shadow-xs transition-all hidden md:flex items-center gap-1.5 cursor-pointer"
             >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-violet-600" />
               <span>DrVet Scenario</span>
             </button>
           </div>
@@ -420,112 +430,123 @@ export default function AiSeoDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
         
         {/* Safety & Status Highlights Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="glass-card p-4 rounded-xl flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-lg bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <ShieldCheck className="w-5 h-5" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
+              <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">PII Redaction Guard</p>
-              <p className="text-sm font-bold text-emerald-400">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">PII Sanitization Guard</p>
+              <p className="text-sm font-extrabold text-emerald-800 mt-0.5">
                 {currentDraft?.safetyReport?.piiRedacted
-                  ? `${currentDraft.safetyReport.redactedItemsCount} Tokens Scrubbed`
-                  : 'Active & Protecting Input'}
+                  ? `${currentDraft.safetyReport.redactedItemsCount} Confidential Items Redacted`
+                  : 'Active & Scrubbing Prompts'}
               </p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Phone numbers, emails, card tokens protected</p>
             </div>
           </div>
 
-          <div className="glass-card p-4 rounded-xl flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-              <Lock className="w-5 h-5" />
+          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shrink-0">
+              <Lock className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Approval Status</p>
-              <div className="flex items-center gap-2">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Approval Governance</p>
+              <div className="flex items-center gap-2 mt-0.5">
                 <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wide ${
                     !currentDraft
-                      ? 'bg-slate-800 text-slate-400 border border-slate-700'
+                      ? 'bg-slate-100 text-slate-600 border border-slate-200'
                       : currentDraft.status === 'PUBLISHED'
-                      ? 'bg-emerald-950 text-emerald-300 border border-emerald-600'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                       : currentDraft.status === 'APPROVED'
-                      ? 'bg-blue-950 text-blue-300 border border-blue-600'
-                      : 'bg-amber-950 text-amber-300 border border-amber-600'
+                      ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                      : 'bg-amber-100 text-amber-800 border border-amber-300 animate-pulse'
                   }`}
                 >
-                  {currentDraft ? currentDraft.status : 'NO DRAFT ACTIVE'}
+                  {currentDraft ? currentDraft.status : 'NO ACTIVE DRAFT'}
                 </span>
                 {currentDraft?.status === 'DRAFT' && (
-                  <span className="text-xs text-amber-400/90 font-medium">Approval Required</span>
+                  <span className="text-xs font-bold text-amber-700">Requires Approval</span>
                 )}
               </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">Cannot publish directly without human sign-off</p>
             </div>
           </div>
 
-          <div className="glass-card p-4 rounded-xl flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-lg bg-purple-950/60 border border-purple-500/30 flex items-center justify-center text-purple-400">
-              <Sparkles className="w-5 h-5" />
+          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-600 shrink-0">
+              <Sparkles className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">AI Engine</p>
-              <p className="text-sm font-bold text-purple-300">Mock LLM Provider (Pluggable)</p>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">AI Generation Engine</p>
+              <p className="text-sm font-extrabold text-violet-900 mt-0.5">Mock LLM Provider (Pluggable)</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Secrets securely isolated on backend</p>
             </div>
           </div>
         </div>
 
         {/* SECTION A: Page Information */}
-        <section className="glass-panel p-6 sm:p-8 rounded-2xl shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+        <section className="glass-panel p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden bg-white">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="w-6 h-6 rounded-md bg-cyan-600 text-white flex items-center justify-center text-xs font-bold">
+              <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black shadow-sm">
                   A
                 </span>
                 Page Information
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs font-medium text-slate-500 mt-1">
                 Provide the event page details to feed into the safe AI SEO suggestion generator.
               </p>
             </div>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-6">
             <div>
-              <label htmlFor="page-title" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                Page Title
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="page-title" className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Page Title
+                </label>
+                <span className="text-xs text-slate-400">Default Space42 Arena Event</span>
+              </div>
               <input
                 id="page-title"
                 type="text"
                 value={pageTitle}
                 onChange={(e) => setPageTitle(e.target.value)}
                 placeholder="e.g. Space42 Arena – Summer Music Festival"
-                className="w-full px-4 py-3 bg-slate-900/90 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 text-sm font-medium transition-all"
+                className="w-full px-4 py-3.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 text-sm font-semibold transition-all shadow-2xs"
               />
             </div>
 
             <div>
-              <label htmlFor="page-description" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                Page Description
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="page-description" className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Page Description
+                </label>
+                <span className="text-xs text-slate-400">Context for LLM analysis</span>
+              </div>
               <textarea
                 id="page-description"
                 rows={3}
                 value={pageDescription}
                 onChange={(e) => setPageDescription(e.target.value)}
                 placeholder="Describe the event, features, location, and highlights..."
-                className="w-full px-4 py-3 bg-slate-900/90 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 text-sm font-medium transition-all"
+                className="w-full px-4 py-3.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 text-sm font-medium transition-all shadow-2xs leading-relaxed"
               />
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Input sanitized before sending to model</span>
+              </div>
               <button
                 id="btn-generate-seo"
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold rounded-xl text-sm shadow-lg shadow-cyan-500/25 flex items-center gap-2.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="px-7 py-3.5 bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 hover:from-indigo-700 hover:to-violet-800 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-500/25 flex items-center gap-2.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.99]"
               >
                 {isGenerating ? (
                   <>
@@ -547,25 +568,25 @@ export default function AiSeoDashboard() {
         {currentDraft && (
           <div className="space-y-8 animate-fadeIn">
             
-            {/* View Tabs */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
+            {/* View Tabs & Status Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+              <div className="flex items-center gap-2 p-1 bg-slate-200/60 rounded-2xl w-fit">
                 <button
                   onClick={() => setActiveTab('editor')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     activeTab === 'editor'
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-indigo-700 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <span>Editable Content</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('preview')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                     activeTab === 'preview'
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-indigo-700 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <Eye className="w-3.5 h-3.5" />
@@ -573,10 +594,10 @@ export default function AiSeoDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab('safety')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                     activeTab === 'safety'
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-indigo-700 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
@@ -587,10 +608,10 @@ export default function AiSeoDashboard() {
                 </button>
                 <button
                   onClick={() => setActiveTab('audit')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                     activeTab === 'audit'
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-indigo-700 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <History className="w-3.5 h-3.5" />
@@ -600,14 +621,14 @@ export default function AiSeoDashboard() {
 
               {/* Status Badge */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400 font-medium">Status:</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Current Status:</span>
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase ${
+                  className={`px-3.5 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase ${
                     currentDraft.status === 'PUBLISHED'
-                      ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                       : currentDraft.status === 'APPROVED'
-                      ? 'bg-blue-950 text-blue-300 border border-blue-500/50'
-                      : 'bg-amber-950 text-amber-300 border border-amber-500/50 animate-pulse'
+                      ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                      : 'bg-amber-100 text-amber-800 border border-amber-300 animate-pulse'
                   }`}
                 >
                   {currentDraft.status}
@@ -617,42 +638,43 @@ export default function AiSeoDashboard() {
 
             {/* TAB 1: Editor */}
             {activeTab === 'editor' && (
-              <section className="glass-panel p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <section className="glass-panel p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-7 bg-white">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                   <div>
-                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-md bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
+                    <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2.5">
+                      <span className="w-7 h-7 rounded-lg bg-violet-600 text-white flex items-center justify-center text-xs font-black shadow-sm">
                         B
                       </span>
-                      Generated SEO Content (Editable)
+                      Generated SEO Content (Admin Editable)
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Review and modify the AI suggestions below before submitting for approval.
+                    <p className="text-xs font-medium text-slate-500 mt-1">
+                      Review, refine, and edit the AI suggestions below. You must approve the content before publishing.
                     </p>
                   </div>
                 </div>
 
                 {/* 1. Suggested SEO Title */}
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="seo-title" className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      1. Suggested SEO Title
+                    <label htmlFor="seo-title" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                      <span>1. Suggested SEO Title</span>
+                      <span className="text-[11px] font-normal text-slate-400">(Ideal for Google SERP)</span>
                     </label>
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-xs font-mono px-2 py-0.5 rounded ${
+                        className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full ${
                           isTitleOver
-                            ? 'bg-rose-950 text-rose-300 border border-rose-800'
+                            ? 'bg-rose-100 text-rose-700 border border-rose-300'
                             : isTitleOptimal
-                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                            : 'bg-slate-800 text-slate-400'
+                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                            : 'bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
                         {titleLen} / 70 max chars
                       </span>
                       {isTitleOver && (
-                        <span className="text-xs text-rose-400 font-semibold flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3" /> Exceeds 70-char SERP limit
+                        <span className="text-xs text-rose-600 font-bold flex items-center gap-1">
+                          <AlertTriangle className="w-3.5 h-3.5" /> Exceeds 70-char limit
                         </span>
                       )}
                     </div>
@@ -662,17 +684,17 @@ export default function AiSeoDashboard() {
                     type="text"
                     value={editableTitle}
                     onChange={(e) => setEditableTitle(e.target.value)}
-                    className={`w-full px-4 py-3 bg-slate-900 border rounded-xl text-slate-100 text-sm font-medium focus:outline-none focus:ring-2 transition-all ${
+                    className={`w-full px-4 py-3.5 bg-slate-50 hover:bg-slate-50/90 focus:bg-white border rounded-xl text-slate-900 text-sm font-semibold focus:outline-none focus:ring-4 transition-all ${
                       isTitleOver
-                        ? 'border-rose-500 focus:ring-rose-500/40'
-                        : 'border-slate-700 focus:border-cyan-500 focus:ring-cyan-500/40'
+                        ? 'border-rose-400 focus:ring-rose-100 focus:border-rose-600'
+                        : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
                     }`}
                   />
                   {/* Progress bar */}
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 ${
-                        isTitleOver ? 'bg-rose-500' : isTitleOptimal ? 'bg-emerald-500' : 'bg-cyan-500'
+                        isTitleOver ? 'bg-rose-500' : isTitleOptimal ? 'bg-emerald-500' : 'bg-indigo-500'
                       }`}
                       style={{ width: `${Math.min(100, (titleLen / 70) * 100)}%` }}
                     />
@@ -680,26 +702,27 @@ export default function AiSeoDashboard() {
                 </div>
 
                 {/* 2. Meta Description */}
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="meta-desc" className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      2. Meta Description
+                    <label htmlFor="meta-desc" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                      <span>2. Meta Description</span>
+                      <span className="text-[11px] font-normal text-slate-400">(Search snippet summary)</span>
                     </label>
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-xs font-mono px-2 py-0.5 rounded ${
+                        className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full ${
                           isMetaOver
-                            ? 'bg-rose-950 text-rose-300 border border-rose-800'
+                            ? 'bg-rose-100 text-rose-700 border border-rose-300'
                             : isMetaOptimal
-                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                            : 'bg-slate-800 text-slate-400'
+                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                            : 'bg-slate-100 text-slate-700 border border-slate-200'
                         }`}
                       >
                         {metaLen} / 160 max chars
                       </span>
                       {isMetaOver && (
-                        <span className="text-xs text-rose-400 font-semibold flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3" /> Exceeds 160-char limit
+                        <span className="text-xs text-rose-600 font-bold flex items-center gap-1">
+                          <AlertTriangle className="w-3.5 h-3.5" /> Exceeds 160-char limit
                         </span>
                       )}
                     </div>
@@ -709,17 +732,17 @@ export default function AiSeoDashboard() {
                     rows={3}
                     value={editableMetaDesc}
                     onChange={(e) => setEditableMetaDesc(e.target.value)}
-                    className={`w-full px-4 py-3 bg-slate-900 border rounded-xl text-slate-100 text-sm font-medium focus:outline-none focus:ring-2 transition-all ${
+                    className={`w-full px-4 py-3.5 bg-slate-50 hover:bg-slate-50/90 focus:bg-white border rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-4 transition-all leading-relaxed ${
                       isMetaOver
-                        ? 'border-rose-500 focus:ring-rose-500/40'
-                        : 'border-slate-700 focus:border-cyan-500 focus:ring-cyan-500/40'
+                        ? 'border-rose-400 focus:ring-rose-100 focus:border-rose-600'
+                        : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-100'
                     }`}
                   />
                   {/* Progress bar */}
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 ${
-                        isMetaOver ? 'bg-rose-500' : isMetaOptimal ? 'bg-emerald-500' : 'bg-cyan-500'
+                        isMetaOver ? 'bg-rose-500' : isMetaOptimal ? 'bg-emerald-500' : 'bg-indigo-500'
                       }`}
                       style={{ width: `${Math.min(100, (metaLen / 160) * 100)}%` }}
                     />
@@ -727,22 +750,25 @@ export default function AiSeoDashboard() {
                 </div>
 
                 {/* 3. FAQ Section */}
-                <div className="space-y-4 pt-4 border-t border-slate-800">
+                <div className="space-y-4 pt-4 border-t border-slate-100">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                        3. FAQ Section ({editableFaqs.length} entries)
+                      <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                        <span>3. FAQ Section</span>
+                        <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-extrabold text-[10px]">
+                          {editableFaqs.length} entries
+                        </span>
                       </h3>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 mt-0.5">
                         Edit, delete, or add questions to be included in event rich snippets.
                       </p>
                     </div>
                     <button
                       onClick={handleAddFaq}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-semibold border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 text-xs font-bold border border-slate-300 shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Add FAQ</span>
+                      <span>Add FAQ Entry</span>
                     </button>
                   </div>
 
@@ -750,11 +776,11 @@ export default function AiSeoDashboard() {
                     {editableFaqs.map((faq, index) => (
                       <div
                         key={faq.id || index}
-                        className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition-all space-y-3"
+                        className="p-5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-all space-y-3.5"
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2 flex-1">
-                            <span className="w-5 h-5 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center shrink-0">
+                          <div className="flex items-center gap-2.5 flex-1">
+                            <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center shrink-0">
                               {index + 1}
                             </span>
                             <input
@@ -762,13 +788,13 @@ export default function AiSeoDashboard() {
                               value={faq.question}
                               onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
                               placeholder="Enter FAQ Question..."
-                              className="w-full px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs font-semibold text-white focus:outline-none focus:border-cyan-500"
+                              className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600"
                             />
                           </div>
                           <button
                             onClick={() => handleDeleteFaq(index)}
                             title="Delete FAQ"
-                            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -780,7 +806,7 @@ export default function AiSeoDashboard() {
                             value={faq.answer}
                             onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
                             placeholder="Enter detailed FAQ Answer..."
-                            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                            className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-600 leading-relaxed"
                           />
                         </div>
                       </div>
@@ -792,42 +818,42 @@ export default function AiSeoDashboard() {
 
             {/* TAB 2: SERP Preview */}
             {activeTab === 'preview' && (
-              <section className="glass-panel p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
+              <section className="glass-panel p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6 bg-white">
                 <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Search className="w-5 h-5 text-cyan-400" />
+                  <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2.5">
+                    <Search className="w-5 h-5 text-indigo-600" />
                     Google Search Result Simulator
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs font-medium text-slate-500 mt-1">
                     Live desktop search snippet rendering based on current title and meta description.
                   </p>
                 </div>
 
-                {/* Google Snippet Box */}
-                <div className="p-6 rounded-xl bg-white text-black max-w-2xl shadow-xl font-sans space-y-2">
+                {/* Google Snippet Card */}
+                <div className="p-7 rounded-2xl bg-white text-slate-900 max-w-2xl border border-slate-200 shadow-md font-sans space-y-2.5">
                   <div className="flex items-center gap-2 text-xs text-slate-600">
-                    <div className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold">
+                    <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-black text-indigo-700">
                       S
                     </div>
-                    <span>https://space42arena.ae › events › summer-music-festival</span>
+                    <span className="font-medium text-slate-700">https://space42arena.ae › events › summer-music-festival</span>
                   </div>
 
-                  <h3 className="text-xl text-[#1a0dab] hover:underline cursor-pointer font-medium leading-tight">
+                  <h3 className="text-xl text-[#1a0dab] hover:underline cursor-pointer font-semibold leading-snug">
                     {editableTitle || 'Space42 Arena Summer Music Festival 2026 | Abu Dhabi'}
                   </h3>
 
-                  <p className="text-sm text-[#4d5156] leading-snug">
+                  <p className="text-sm text-[#4d5156] leading-relaxed">
                     {editableMetaDesc || 'A fictional music festival featuring live performances, food stalls and entertainment in Abu Dhabi.'}
                   </p>
 
                   {/* FAQ Rich snippet mockup */}
                   {editableFaqs.length > 0 && (
-                    <div className="pt-3 border-t border-slate-200 mt-2 space-y-2">
-                      <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">People Also Ask</p>
+                    <div className="pt-4 border-t border-slate-100 mt-3 space-y-2.5">
+                      <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">People Also Ask</p>
                       {editableFaqs.slice(0, 2).map((faq, i) => (
-                        <div key={i} className="text-xs text-slate-800 pl-2 border-l-2 border-blue-500">
-                          <p className="font-semibold text-blue-900">{faq.question}</p>
-                          <p className="text-slate-600 line-clamp-1">{faq.answer}</p>
+                        <div key={i} className="text-xs text-slate-800 pl-3 border-l-2 border-indigo-600 py-0.5">
+                          <p className="font-bold text-indigo-950">{faq.question}</p>
+                          <p className="text-slate-600 line-clamp-1 mt-0.5">{faq.answer}</p>
                         </div>
                       ))}
                     </div>
@@ -838,52 +864,52 @@ export default function AiSeoDashboard() {
 
             {/* TAB 3: Safety Guardrails Report */}
             {activeTab === 'safety' && (
-              <section className="glass-panel p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
+              <section className="glass-panel p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6 bg-white">
                 <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                  <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2.5">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
                     Safe AI & Quality Guardrails Telemetry
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs font-medium text-slate-500 mt-1">
                     Automated data protection and hallucination checks performed prior to admin review.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                      <ShieldCheck className="w-4 h-4" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-3">
+                    <div className="flex items-center gap-2 text-emerald-800 font-extrabold text-sm">
+                      <ShieldCheck className="w-5 h-5 text-emerald-600" />
                       <span>Outbound PII Sanitization</span>
                     </div>
-                    <p className="text-xs text-slate-300">
-                      All customer emails, phone numbers (+971...), national IDs (Emirates ID), and secret API keys are scrubbed before prompt submission to the LLM.
+                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                      All customer emails, phone numbers (+971...), national IDs (Emirates ID), and secret API keys are scrubbed on the server before prompt submission to the LLM.
                     </p>
-                    <div className="text-xs px-3 py-2 rounded-lg bg-slate-950 font-mono text-slate-400">
+                    <div className="text-xs px-3.5 py-2.5 rounded-xl bg-white border border-emerald-200 font-mono text-emerald-800 font-bold">
                       Status: {currentDraft.safetyReport?.piiRedacted ? 'Redactions performed' : 'No PII detected in inputs (Clean)'}
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-                    <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm">
-                      <FileCheck className="w-4 h-4" />
+                  <div className="p-5 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-3">
+                    <div className="flex items-center gap-2 text-indigo-800 font-extrabold text-sm">
+                      <FileCheck className="w-5 h-5 text-indigo-600" />
                       <span>Accuracy & Hallucination Guard</span>
                     </div>
-                    <p className="text-xs text-slate-300">
+                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
                       Post-generation scanner checks for fabricated clinical guarantees ("100% cure"), unverified free pricing, or currency claims not present in source info.
                     </p>
-                    <div className="text-xs px-3 py-2 rounded-lg bg-slate-950 font-mono text-slate-400">
+                    <div className="text-xs px-3.5 py-2.5 rounded-xl bg-white border border-indigo-200 font-mono text-indigo-800 font-bold">
                       Accuracy Check: {currentDraft.safetyReport?.accuracyPassed ? 'Passed (No high-risk claims detected)' : 'Review Required'}
                     </div>
                   </div>
                 </div>
 
                 {currentDraft.safetyReport?.warnings && currentDraft.safetyReport.warnings.length > 0 && (
-                  <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-600/40 space-y-2">
-                    <div className="flex items-center gap-2 text-amber-300 text-xs font-bold">
-                      <AlertTriangle className="w-4 h-4" />
+                  <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 space-y-2">
+                    <div className="flex items-center gap-2 text-amber-800 text-xs font-bold">
+                      <AlertTriangle className="w-4 h-4 text-amber-600" />
                       <span>Safety Review Flags:</span>
                     </div>
-                    <ul className="list-disc list-inside text-xs text-amber-200/90 space-y-1">
+                    <ul className="list-disc list-inside text-xs text-amber-900 font-medium space-y-1">
                       {currentDraft.safetyReport.warnings.map((w, i) => (
                         <li key={i}>{w}</li>
                       ))}
@@ -895,13 +921,13 @@ export default function AiSeoDashboard() {
 
             {/* TAB 4: Audit Trail */}
             {activeTab === 'audit' && (
-              <section className="glass-panel p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
+              <section className="glass-panel p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6 bg-white">
                 <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <History className="w-5 h-5 text-indigo-400" />
+                  <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2.5">
+                    <History className="w-5 h-5 text-indigo-600" />
                     Immutable Audit Trail
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs font-medium text-slate-500 mt-1">
                     Full history of actions, human reviews, edits, and timestamps for governance compliance.
                   </p>
                 </div>
@@ -910,28 +936,28 @@ export default function AiSeoDashboard() {
                   {currentDraft.auditTrail.map((entry, index) => (
                     <div
                       key={entry.id || index}
-                      className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex items-start justify-between gap-4"
+                      className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start justify-between gap-4"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                            className={`px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase ${
                               entry.action === 'PUBLISHED'
-                                ? 'bg-emerald-950 text-emerald-300 border border-emerald-700'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 : entry.action === 'APPROVED'
-                                ? 'bg-blue-950 text-blue-300 border border-blue-700'
+                                ? 'bg-blue-100 text-blue-800 border border-blue-300'
                                 : entry.action === 'EDITED'
-                                ? 'bg-purple-950 text-purple-300 border border-purple-700'
-                                : 'bg-amber-950 text-amber-300 border border-amber-700'
+                                ? 'bg-purple-100 text-purple-800 border border-purple-300'
+                                : 'bg-amber-100 text-amber-800 border border-amber-300'
                             }`}
                           >
                             {entry.action}
                           </span>
-                          <span className="text-xs font-semibold text-slate-300">{entry.actor}</span>
+                          <span className="text-xs font-bold text-slate-800">{entry.actor}</span>
                         </div>
-                        <p className="text-xs text-slate-400">{entry.notes}</p>
+                        <p className="text-xs font-medium text-slate-600">{entry.notes}</p>
                       </div>
-                      <span className="text-[11px] font-mono text-slate-500 whitespace-nowrap">
+                      <span className="text-[11px] font-mono text-slate-400 whitespace-nowrap">
                         {new Date(entry.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
@@ -941,47 +967,47 @@ export default function AiSeoDashboard() {
             )}
 
             {/* SECTION C: Approval Workflow Action Bar */}
-            <section className="glass-panel p-6 rounded-2xl shadow-2xl border border-slate-700/80">
+            <section className="glass-panel p-6 sm:p-7 rounded-3xl shadow-lg border border-slate-200 bg-white">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-md bg-purple-600 text-white flex items-center justify-center text-xs font-bold">
+                  <h2 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black shadow-xs">
                       C
                     </span>
                     Human-in-the-Loop Approval Actions
                   </h2>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs font-medium text-slate-500 mt-1">
                     AI generation remains in DRAFT. Review and explicitly approve before publishing.
                   </p>
                 </div>
 
                 {/* Workflow Stepper Indicator */}
-                <div className="flex items-center gap-2 text-xs font-semibold">
+                <div className="flex items-center gap-2 text-xs font-bold">
                   <div
-                    className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${
+                    className={`px-3.5 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
                       currentDraft.status === 'DRAFT'
-                        ? 'bg-amber-950/80 border-amber-500 text-amber-300 ring-2 ring-amber-500/20'
-                        : 'bg-slate-900 border-slate-800 text-slate-500'
+                        ? 'bg-amber-50 border-amber-300 text-amber-800 ring-2 ring-amber-200'
+                        : 'bg-slate-50 border-slate-200 text-slate-400'
                     }`}
                   >
                     <span>1. DRAFT</span>
                   </div>
-                  <span className="text-slate-600">➔</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                   <div
-                    className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${
+                    className={`px-3.5 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
                       currentDraft.status === 'APPROVED'
-                        ? 'bg-blue-950/80 border-blue-500 text-blue-300 ring-2 ring-blue-500/20'
-                        : 'bg-slate-900 border-slate-800 text-slate-500'
+                        ? 'bg-blue-50 border-blue-300 text-blue-800 ring-2 ring-blue-200'
+                        : 'bg-slate-50 border-slate-200 text-slate-400'
                     }`}
                   >
                     <span>2. APPROVED</span>
                   </div>
-                  <span className="text-slate-600">➔</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                   <div
-                    className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 ${
+                    className={`px-3.5 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
                       currentDraft.status === 'PUBLISHED'
-                        ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 ring-2 ring-emerald-500/20'
-                        : 'bg-slate-900 border-slate-800 text-slate-500'
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800 ring-2 ring-emerald-200'
+                        : 'bg-slate-50 border-slate-200 text-slate-400'
                     }`}
                   >
                     <span>3. PUBLISHED</span>
@@ -995,7 +1021,7 @@ export default function AiSeoDashboard() {
                     id="btn-regenerate"
                     onClick={handleRegenerate}
                     disabled={isGenerating || currentDraft.status === 'PUBLISHED'}
-                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-300 shadow-xs flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
                     <span>Regenerate Suggestions</span>
@@ -1006,9 +1032,9 @@ export default function AiSeoDashboard() {
                     id="btn-save-draft"
                     onClick={handleSaveDraft}
                     disabled={isSaving || currentDraft.status === 'PUBLISHED'}
-                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold border border-slate-300 shadow-xs flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   >
-                    <Save className="w-3.5 h-3.5 text-cyan-400" />
+                    <Save className="w-3.5 h-3.5 text-indigo-600" />
                     <span>Save Draft</span>
                   </button>
 
@@ -1017,7 +1043,7 @@ export default function AiSeoDashboard() {
                     id="btn-approve-content"
                     onClick={handleApprove}
                     disabled={isApproving || currentDraft.status === 'PUBLISHED' || currentDraft.status === 'APPROVED'}
-                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>{currentDraft.status === 'APPROVED' ? 'Approved ✓' : 'Approve Content'}</span>
@@ -1028,12 +1054,12 @@ export default function AiSeoDashboard() {
                     id="btn-publish-content"
                     onClick={handlePublish}
                     disabled={isPublishing || currentDraft.status === 'PUBLISHED'}
-                    className={`px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg flex items-center gap-2 transition-all cursor-pointer ${
+                    className={`px-5 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-2 transition-all cursor-pointer ${
                       currentDraft.status === 'APPROVED'
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25 ring-2 ring-emerald-400/50'
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25 ring-2 ring-emerald-300'
                         : currentDraft.status === 'PUBLISHED'
-                        ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
-                        : 'bg-slate-800/80 hover:bg-slate-800 text-slate-400 border border-slate-700'
+                        ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-500 border border-slate-300'
                     }`}
                   >
                     <Send className="w-3.5 h-3.5" />
