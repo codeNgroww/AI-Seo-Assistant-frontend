@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Sparkles,
   ShieldCheck,
@@ -20,7 +20,8 @@ import {
   ShieldAlert,
   Info,
   SlidersHorizontal,
-  ArrowRight
+  ArrowRight,
+  Eraser
 } from 'lucide-react';
 
 interface FaqItem {
@@ -59,6 +60,11 @@ interface SeoDraft {
 
 const API_BASE = 'http://localhost:3001/api/seo';
 
+// Client-side regex detectors for instant feedback
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+const PHONE_REGEX = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}/;
+const CARD_REGEX = /\b(?:\d{4}[-\s]?){3}\d{4}\b/;
+
 export default function AiSeoDashboard() {
   // Section A: Page Information (Assessment defaults)
   const [pageTitle, setPageTitle] = useState('Space42 Arena – Summer Music Festival');
@@ -74,6 +80,9 @@ export default function AiSeoDashboard() {
   const [editableMetaDesc, setEditableMetaDesc] = useState('');
   const [editableFaqs, setEditableFaqs] = useState<FaqItem[]>([]);
 
+  // Security & Error State
+  const [securityError, setSecurityError] = useState<string | null>(null);
+
   // UI State
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -84,8 +93,23 @@ export default function AiSeoDashboard() {
 
   const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4500);
+    setTimeout(() => setToast(null), 5000);
   };
+
+  // Real-time detection in inputs
+  const detectedPiiTypes = useMemo(() => {
+    const combined = `${pageTitle} ${pageDescription}`;
+    const detected: string[] = [];
+    if (EMAIL_REGEX.test(combined)) detected.push('Email Address');
+    if (CARD_REGEX.test(combined)) detected.push('Payment Card Token');
+    if (PHONE_REGEX.test(combined)) {
+      const match = combined.match(PHONE_REGEX);
+      if (match && match[0].replace(/\D/g, '').length >= 8) {
+        detected.push('Phone Number');
+      }
+    }
+    return detected;
+  }, [pageTitle, pageDescription]);
 
   // Sync state when draft updates
   const syncDraftToEditor = (draft: SeoDraft) => {
@@ -96,12 +120,13 @@ export default function AiSeoDashboard() {
   };
 
   // 1. Generate Suggestions via NestJS API
-  const handleGenerate = async () => {
+  const handleGenerate = async (allowRedact = false) => {
     if (!pageTitle.trim() || !pageDescription.trim()) {
       showToast('Page Title and Description cannot be empty.', 'error');
       return;
     }
 
+    setSecurityError(null);
     setIsGenerating(true);
     try {
       const res = await fetch(`${API_BASE}/generate`, {
@@ -111,16 +136,26 @@ export default function AiSeoDashboard() {
           'x-user-role': 'ADMIN',
           'x-user-name': 'Space42 Admin',
         },
-        body: JSON.stringify({ pageTitle, pageDescription }),
+        body: JSON.stringify({ pageTitle, pageDescription, allowRedact }),
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to generate suggestions');
+        const msg = errorData.message || 'Failed to generate suggestions';
+        
+        // If security alert regarding PII
+        if (res.status === 400 && (msg.includes('Security Policy Alert') || msg.includes('confidential'))) {
+          setSecurityError(msg);
+          showToast(msg, 'error');
+          return;
+        }
+
+        throw new Error(msg);
       }
 
       const draft: SeoDraft = await res.json();
       syncDraftToEditor(draft);
+      setSecurityError(null);
       showToast('New SEO suggestions generated! Status initialized as DRAFT.', 'success');
     } catch (err: any) {
       showToast(err.message || 'Network error connecting to backend API at port 3001', 'error');
@@ -353,7 +388,7 @@ export default function AiSeoDashboard() {
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-xl backdrop-blur-md animate-fadeIn transition-all ${
+          className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-xl backdrop-blur-md animate-fadeIn transition-all max-w-md ${
             toast.type === 'success'
               ? 'bg-emerald-50/95 border-emerald-300 text-emerald-900 shadow-emerald-500/10'
               : toast.type === 'error'
@@ -404,6 +439,7 @@ export default function AiSeoDashboard() {
               onClick={() => {
                 setPageTitle('Space42 Arena – Summer Music Festival');
                 setPageDescription('A fictional music festival featuring live performances, food stalls and entertainment in Abu Dhabi.');
+                setSecurityError(null);
                 showToast('Reset to Space42 Arena default event inputs.', 'info');
               }}
               className="text-xs px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 font-semibold text-slate-700 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
@@ -413,8 +449,21 @@ export default function AiSeoDashboard() {
             </button>
             <button
               onClick={() => {
+                setPageTitle('Space42 Arena – VIP Tickets Booking');
+                setPageDescription('Contact organizer at bookings@space42-arena.ae or call +971-50-9876543. Credit card token: 4532-1234-5678-9012.');
+                setSecurityError(null);
+                showToast('Loaded PII test input (includes phone, email, card token) to test rejection error.', 'warning');
+              }}
+              className="text-xs px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-300 font-bold text-rose-800 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+              <span>Test PII Rejection</span>
+            </button>
+            <button
+              onClick={() => {
                 setPageTitle('DrVet Clinic – 24/7 Veterinary Emergency Care');
                 setPageDescription('Licensed veterinary hospital providing around-the-clock emergency care, surgery, and wellness checkups for pets in Abu Dhabi.');
+                setSecurityError(null);
                 showToast('Loaded DrVet scenario preset.', 'info');
               }}
               className="text-xs px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 font-semibold text-slate-700 shadow-xs transition-all hidden md:flex items-center gap-1.5 cursor-pointer"
@@ -439,8 +488,8 @@ export default function AiSeoDashboard() {
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">PII Sanitization Guard</p>
               <p className="text-sm font-extrabold text-emerald-800 mt-0.5">
                 {currentDraft?.safetyReport?.piiRedacted
-                  ? `${currentDraft.safetyReport.redactedItemsCount} Confidential Items Redacted`
-                  : 'Active & Scrubbing Prompts'}
+                  ? `${currentDraft.safetyReport.redactedItemsCount} Confidential Items Scrubbed`
+                  : 'Active & Rejecting Leaks'}
               </p>
               <p className="text-[11px] text-slate-400 mt-0.5">Phone numbers, emails, card tokens protected</p>
             </div>
@@ -502,6 +551,42 @@ export default function AiSeoDashboard() {
             </div>
           </div>
 
+          {/* Security Alert Banner when PII is detected or thrown */}
+          {securityError && (
+            <div className="mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 shadow-sm animate-fadeIn flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0 mt-0.5">
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-rose-900 flex items-center gap-1.5">
+                    Security Policy Violation – Input Blocked
+                  </h4>
+                  <p className="text-xs font-medium text-rose-800 mt-0.5 leading-relaxed">
+                    {securityError}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => handleGenerate(true)}
+                  disabled={isGenerating}
+                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Eraser className="w-3.5 h-3.5" />
+                  <span>Auto-Scrub & Generate</span>
+                </button>
+                <button
+                  onClick={() => setSecurityError(null)}
+                  className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200 transition-all cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-6">
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -514,7 +599,10 @@ export default function AiSeoDashboard() {
                 id="page-title"
                 type="text"
                 value={pageTitle}
-                onChange={(e) => setPageTitle(e.target.value)}
+                onChange={(e) => {
+                  setPageTitle(e.target.value);
+                  setSecurityError(null);
+                }}
                 placeholder="e.g. Space42 Arena – Summer Music Festival"
                 className="w-full px-4 py-3.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 text-sm font-semibold transition-all shadow-2xs"
               />
@@ -531,20 +619,33 @@ export default function AiSeoDashboard() {
                 id="page-description"
                 rows={3}
                 value={pageDescription}
-                onChange={(e) => setPageDescription(e.target.value)}
+                onChange={(e) => {
+                  setPageDescription(e.target.value);
+                  setSecurityError(null);
+                }}
                 placeholder="Describe the event, features, location, and highlights..."
                 className="w-full px-4 py-3.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-600 text-sm font-medium transition-all shadow-2xs leading-relaxed"
               />
+
+              {/* Real-time Inline PII detection warning */}
+              {detectedPiiTypes.length > 0 && (
+                <div className="mt-2.5 flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-medium animate-fadeIn">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>
+                    <strong>Confidential data detected in input:</strong> {detectedPiiTypes.join(', ')}. Generating without scrubbing will trigger a security error.
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between pt-2">
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Input sanitized before sending to model</span>
+                <span>Protected: Phone numbers, emails, and card tokens are rejected or scrubbed</span>
               </div>
               <button
                 id="btn-generate-seo"
-                onClick={handleGenerate}
+                onClick={() => handleGenerate(false)}
                 disabled={isGenerating}
                 className="px-7 py-3.5 bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 hover:from-indigo-700 hover:to-violet-800 text-white font-bold rounded-xl text-sm shadow-lg shadow-indigo-500/25 flex items-center gap-2.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.99]"
               >
@@ -879,10 +980,10 @@ export default function AiSeoDashboard() {
                   <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-3">
                     <div className="flex items-center gap-2 text-emerald-800 font-extrabold text-sm">
                       <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                      <span>Outbound PII Sanitization</span>
+                      <span>Outbound PII Protection Policy</span>
                     </div>
                     <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                      All customer emails, phone numbers (+971...), national IDs (Emirates ID), and secret API keys are scrubbed on the server before prompt submission to the LLM.
+                      All customer emails, phone numbers (+971...), national IDs (Emirates ID), and secret API keys are strictly rejected with an explicit error message unless auto-scrubbed.
                     </p>
                     <div className="text-xs px-3.5 py-2.5 rounded-xl bg-white border border-emerald-200 font-mono text-emerald-800 font-bold">
                       Status: {currentDraft.safetyReport?.piiRedacted ? 'Redactions performed' : 'No PII detected in inputs (Clean)'}
